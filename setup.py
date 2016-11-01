@@ -1,6 +1,18 @@
 from distutils.core import setup
 import os
 
+try:
+  import pandoc
+  nopd = False
+  if os.name != 'nt':
+    pandoc.core.PANDOC_PATH = 'pandoc'
+  else:
+    if 'LOCALAPPDATA' in os.environ: app = os.getenv('LOCALAPPDATA')
+    else: app = os.getenv('APPDATA')
+    pandoc.core.PANDOC_PATH = '%s/Pandoc/pandoc' % (app, )
+except (Exception, ), e:
+  nopd = True
+
 PKG_TITLE = 'pyxpm'
 mdl = __import__(PKG_TITLE)
 PKG_VER = mdl.__version__
@@ -10,6 +22,11 @@ AUTHOR_EMAIL = mdl.__author_email__
 PKG_KWD = '''XPM matplotlib scipy numpy PIL image bitmap'''
 
 long_description = open('README.md', 'rb').read()
+short_description = long_description.split('\n')[3]
+if not nopd:
+  pd = pandoc.Document()
+  pd.markdown = long_description
+  long_description = pd.rst
 
 pkg_requirements = map(lambda a: a.split('>')[0],
   open('requirements.txt', 'rb').read().splitlines())
@@ -58,7 +75,7 @@ kwargs = {
   'name': PKG_TITLE,
   'version': PKG_VER,
   'keywords': PKG_KWD.split(' '),
-  'description': long_description.split('\n')[3],
+  'description': short_description,
   'long_description': long_description,
   'author': AUTHOR,
   'author_email': AUTHOR_EMAIL,
