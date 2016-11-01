@@ -1,27 +1,64 @@
 from distutils.core import setup
 import os
 
-mdl = __import__('pyxpm')
+PKG_TITLE = 'pyxpm'
+mdl = __import__(PKG_TITLE)
+PKG_VER = mdl.__version__
+PKG_URL = mdl.__url__
+AUTHOR = mdl.__author__
+AUTHOR_EMAIL = mdl.__author_email__
+PKG_KWD = '''XPM matplotlib scipy numpy PIL image bitmap'''
+
+long_description = open('README.md', 'rb').read()
+
+pkg_requirements = map(lambda a: a.split('>')[0],
+  open('requirements.txt', 'rb').read().splitlines())
+
+data_apdx = [
+  'MANIFEST.in',
+  '.gitignore',
+  'README.md',
+  'LICENSE',
+  'requirements.txt']
+
+R_APDX = [('dll', ['.gitkeep'])]
+R_APDX += [('res', [
+  'cs_Tux_58x64_c16.xpm',
+  'cs_Tux_ecb_58x64_c16.xpm'])]
+R_APDX += [('include', [
+  'xpm.h'])]
+R_APDX += [('src', [
+  'xpm.c',
+  'test_xpm.py',
+  'makefile.tdmgcc64'])]
+data_r_apdx = [map(lambda a: '%s/%s' % (t[0], a), t[1]) for t in R_APDX]
+
+if os.name != 'nt':
+  apdx_dir = '/opt/%s' % (PKG_TITLE, ) # setup as data_files
+  pkg_apdx = []
+else: # to avlid SandboxViolation on mkdir
+  apdx_dir = 'conf/%s' % (PKG_TITLE, ) # setup as package_data
+  '''
+  pkg_apdx = map(lambda a: '%s/%s' % (apdx_dir, a),
+    reduce(lambda a, b: a + b, data_r_apdx, data_apdx))
+  '''
+  pkg_apdx = []
+
+package_data = {PKG_TITLE: ['conf/setup.cf'] + pkg_apdx}
 
 kwargs = {
-  'name': 'pyxpm',
-  'version': mdl.__version__,
-  'keywords': 'XPM numpy PIL image',
-  'description': ('XPM image file loader for Python (to numpy ndarray or PIL) native C .pyd'),
-  'long_description': open('README.md', 'rb').read(),
-  'author': mdl.__author__,
-  'author_email': mdl.__author_email__,
-  'url': mdl.__url__,
-  'packages': ['pyxpm'],
-  'package_dir': {'pyxpm': './pyxpm'},
-  'package_data': {'pyxpm': [
-    'conf/setup.cf',
-    'include/xpm.h',
-    'src/xpm.c',
-    'src/makefile.tdmgcc64',
-    'cs_Tux_58x64_c16.xpm',
-    'cs_Tux_ecb_58x64_c16.xpm']},
-  'requires': ['numpy', 'PIL'],
+  'name': PKG_TITLE,
+  'version': PKG_VER,
+  'keywords': PKG_KWD.split(' '),
+  'description': long_description.split('\n')[3],
+  'long_description': long_description,
+  'author': AUTHOR,
+  'author_email': AUTHOR_EMAIL,
+  'url': PKG_URL,
+  'packages': [PKG_TITLE],
+  'package_dir': {PKG_TITLE: './%s' % PKG_TITLE},
+  'package_data': package_data,
+  'requires': pkg_requirements,
   'classifiers': [
     'Development Status :: 4 - Beta',
     'Environment :: Console',
@@ -38,5 +75,10 @@ kwargs = {
     'Topic :: Software Development :: Libraries :: Python Modules',
     'Topic :: Utilities'],
   'license': 'MIT License'}
+
+if os.name != 'nt':
+  kwargs['data_files'] = reduce(
+    lambda a, b: a + [('%s/%s' % (apdx_dir, R_APDX[b][0]), data_r_apdx[b])],
+    range(len(R_APDX)), [(apdx_dir, data_apdx)])
 
 setup(**kwargs)

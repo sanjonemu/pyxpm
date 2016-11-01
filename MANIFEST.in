@@ -7,3 +7,4 @@ include pyxpm/conf/*
 include include/*
 include src/*
 include res/*
+include dll/.gitkeep
