@@ -1,2 +1,7 @@
 # custom
 .ref/
+./.ref/
+./dist/
+./build/
+*.pyc
+MANIFEST

@@ -1,0 +1,9 @@
+include MANIFEST.in
+include .gitignore
+include README.md
+include LICENSE
+include requirements.txt
+include pyxpm/conf/*
+include include/*
+include src/*
+include res/*

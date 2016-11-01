@@ -1,0 +1,99 @@
+# makefile for .pyd (32bit) and .exe (64/32bit)
+# needless .def (auto generated and --add-stdcall-alias)
+# numpy.get_include() to get include path
+TGT = xpmmain
+PYD = xpm
+OUT_DIR_ = ..\dll
+OUT_DIR = ../dll
+PYX86 = Python25
+PY_INC = -I/$(PYX86)/include
+NP_INC_0 = -I/$(PYX86)/lib/site-packages/numpy/core/include
+NP_INC_1 = -I/$(PYX86)/lib/site-packages/numpy/numarray
+NP_INC = $(NP_INC_0) $(NP_INC_1)
+INC = ../include
+LOCAL_INC = -I$(INC)
+#
+MINGW_DIR = /tdm-gcc-64
+MINGW_LIB = $(MINGW_DIR)/x86_64-w64-mingw32/lib
+MINGW_LIB32 = $(MINGW_DIR)/x86_64-w64-mingw32/lib32
+MINGW_L = $(MINGW_DIR)/lib
+MINGW_LG = $(MINGW_DIR)/lib/gcc
+MINGW_WLIB = $(MINGW_DIR)/lib/gcc/x86_64-w64-mingw32/5.1.0
+MINGW_WLIB32 = $(MINGW_DIR)/lib/gcc/x86_64-w64-mingw32/5.1.0/32
+CC = gcc
+CFLAGS = $(NP_INC) $(PY_INC) $(LOCAL_INC)
+LD = ld
+LFLAGS = -s -m i386pep --exclude-libs=libpthread.a -Bdynamic
+LFLAGS32 = -s -m i386pe --exclude-libs=libpthread.a -Bdynamic
+#
+# -Bstatic
+#
+LIB_RB = $(MINGW_LIB)/crt2.o $(MINGW_WLIB)/crtbegin.o
+LIB_DLLRB = $(MINGW_LIB)/dllcrt2.o $(MINGW_WLIB)/crtbegin.o
+LIB_RB32 = $(MINGW_LIB32)/crt2.o $(MINGW_WLIB32)/crtbegin.o
+LIB_DLLRB32 = $(MINGW_LIB32)/dllcrt2.o $(MINGW_WLIB32)/crtbegin.o
+LIB_E = $(MINGW_WLIB)/crtend.o
+LIB_E32 = $(MINGW_WLIB32)/crtend.o
+#
+LIB_DIR = -L$(MINGW_WLIB) -L$(MINGW_LG) -L$(MINGW_LIB) -L$(MINGW_L)
+LIB_DIR32 = -L$(MINGW_WLIB32) -L$(MINGW_LIB32) -L$(LIB_DIR)
+LIB_M = -lmingw32 -lgcc -lmoldname -lmingwex -lmsvcrt -lpthread
+LIB_W = -ladvapi32 -lshell32 -lgdi32 -luser32 -lkernel32
+# set link parameter libs twice to resolve undefined reference
+LIB_FIX = $(LIB_M) $(LIB_W) $(LIB_M) $(LIB_W)
+#
+# -lcomdlg32 --subsystem windows
+# -ld3d9 -ld3dx9
+# -ld3d11 -ld3dx11
+# -lapi-ms-win-core-winrt-l1-1-0 -lapi-ms-win-core-winrt-string-l1-1-0
+#
+LIB_PRE = $(LIB_RB) $(LIB_DIR)
+LIB_DLLPRE = $(LIB_DLLRB) $(LIB_DIR)
+LIB_PRE32 = $(LIB_RB32) $(LIB_DIR32)
+LIB_DLLPRE32 = $(LIB_DLLRB32) $(LIB_DIR32)
+LIB_POST = $(LIB_FIX) $(LIB_E)
+LIB_POST32 = $(LIB_FIX) $(LIB_E32)
+#
+LIB_PYX86 = -L/$(PYX86)/libs -l$(PYX86)
+LIB_IMP = --out-implib $(OUT_DIR)/$(PYD).lib
+LIB_DEF = --output-def $(OUT_DIR)/$(PYD).def
+LIB_SUBPROD = $(LIB_IMP) $(LIB_DEF) --add-stdcall-alias
+#
+# --add-cdecl-alias # unrecognized option
+# --cref
+#
+
+#all : $(TGT).exe $(TGT).64.exe $(TGT).32.exe
+all : $(OUT_DIR)/$(PYD).pyd
+#$(OUT_DIR)/$(TGT).32.exe # $(OUT_DIR)/$(TGT).exe $(OUT_DIR)/$(TGT).64.exe
+
+clean :
+	del *.o
+	del *.o64
+	del *.o32
+	del *.s
+
+$(OUT_DIR)/$(TGT).exe : $(OUT_DIR)/$(TGT).64.exe
+	copy /y $(OUT_DIR_)\$(TGT).64.exe $(OUT_DIR_)\$(TGT).exe
+
+$(OUT_DIR)/$(TGT).64.exe : $(TGT).o64
+	$(LD) -o $(OUT_DIR)/$(TGT).64.exe $(LFLAGS) $(LIB_PRE) $(TGT).o64 $(LIB_POST)
+
+$(TGT).o64 : $(TGT).c
+	$(CC) -m64 -o $(TGT).s64 -S $(TGT).c $(CFLAGS)
+	$(CC) -m64 -o $(TGT).o64 -c $(TGT).c $(CFLAGS)
+
+$(OUT_DIR)/$(TGT).32.exe : $(TGT).o32
+	$(LD) -o $(OUT_DIR)/$(TGT).32.exe $(LFLAGS32) $(LIB_PRE32) $(TGT).o32 $(LIB_POST32) $(LIB_PYX86)
+
+$(TGT).o32 : $(TGT).c
+	$(CC) -m32 -o $(TGT).s32 -S $(TGT).c $(CFLAGS)
+	$(CC) -m32 -o $(TGT).o32 -c $(TGT).c $(CFLAGS)
+
+$(OUT_DIR)/$(PYD).pyd : $(PYD).o32
+	$(LD) -shared -o $(OUT_DIR)/$(PYD).pyd $(LFLAGS32) \
+$(LIB_DLLPRE32) $(PYD).o32 $(LIB_POST32) $(LIB_PYX86) $(LIB_SUBPROD)
+
+$(PYD).o32 : $(PYD).c $(INC)/$(PYD).h
+	$(CC) -m32 -o $(PYD).s32 -S $(PYD).c $(CFLAGS)
+	$(CC) -m32 -o $(PYD).o32 -c $(PYD).c $(CFLAGS)
