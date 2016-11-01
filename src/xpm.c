@@ -111,36 +111,43 @@ PyObject *xpmProcessException(PyObject *self, PyObject *args, PyObject *kw)
 PyObject *XPM(PyObject *self, PyObject *args, PyObject *kw)
 {
   char *fn;
-// must be ndarray
-  PyObject *pdi = PyDict_New();
-
-  // PyObject *np = PyImport_ImportModule("numpy");
+  PyObject *nda = NULL; // PyArrayObject *nda = NULL;
 
   FILE *fp = fopen(TESTLOG, "ab");
   fprintf(fp, "XPM %08x %08x %08x\n",
     (uchar *)self, (uchar *)args, (uchar *)kw);
   fclose(fp);
 
-  // if(obj == Py_None){ }
-
   char *keys[] = {"fn", NULL};
   if(!PyArg_ParseTupleAndKeywords(args, kw, "|s", keys, &fn)){
     FILE *fp = fopen(TESTLOG, "ab");
     fprintf(fp, "ERROR: PyArg_ParseTupleAndKeywords()\n");
     fclose(fp);
-    return NULL;
+    return Py_BuildValue("O", Py_None); // must raise Exception
   }else{
     FILE *fp = fopen(TESTLOG, "ab");
     fprintf(fp, "SUCCESS: PyArg_ParseTupleAndKeywords(%s)\n", fn);
     fclose(fp);
   }
 
-// must be ndarray
-  if(fn) PyDict_SetItemString(pdi, "fn", PyString_FromString(fn));
-  // XPMPROCESSEXCEPTION("XPM");
-
-// must be ndarray
-  return Py_BuildValue("{sO}", "o", pdi);
+  if(fn){
+    // PyDict_SetItemString(pdi, "fn", PyString_FromString(fn));
+    // XPMPROCESSEXCEPTION("XPM");
+    int ndim = 3;
+    npy_intp dims[] = {5, 7, 3}; // shapes
+    static double dummy[] = {
+      1.,1.,1., 0.,0.,1., 1.,1.,1., 0.,0.,1., 1.,1.,1., 0.,0.,1., 1.,1.,1.,
+      0.,0.,1., 1.,1.,1., 0.,0.,1., 1.,1.,1., 0.,0.,1., 1.,1.,1., 0.,0.,1.,
+      1.,1.,1., 0.,0.,1., 1.,1.,1., 0.,0.,1., 1.,1.,1., 0.,0.,1., 1.,1.,1.,
+      0.,0.,1., 1.,1.,1., 0.,0.,1., 1.,1.,1., 0.,0.,1., 1.,1.,1., 0.,0.,1.,
+      1.,1.,1., 0.,0.,1., 1.,1.,1., 0.,0.,1., 1.,1.,1., 0.,0.,1., 1.,1.,1.};
+    nda = PyArray_SimpleNewFromData(ndim, dims, NPY_DOUBLE, dummy);
+  }
+  if(!nda){ // if(nda == Py_None)
+    return Py_BuildValue("O", Py_None); // must raise Exception
+  }
+  Py_INCREF(nda);
+  return nda;
 }
 
 static PyMethodDef xpm_methods[] = {

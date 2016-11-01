@@ -24,7 +24,7 @@ data_apdx = [
 
 R_APDX = [(PKG_TITLE, [
   '__init__.py',
-  'xpm.py'])] # remove 'xpm.py' and replace to 'xpm.pyd' later
+  'xpm.py'])] # ** remove 'xpm.py' and replace to 'xpm.pyd' later **
 R_APDX += [('%s/%s' % (PKG_TITLE, 'conf'), [
   'setup.cf'])]
 R_APDX += [('dll', [
