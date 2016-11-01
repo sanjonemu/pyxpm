@@ -14,8 +14,20 @@
 #include <frameobject.h>
 #include <stdio.h>
 
+#ifdef __XPM_MAKE_DLL_
+#define __PORT __declspec(dllexport) // make dll mode
+#else
+#define __PORT __declspec(dllimport) // use dll mode
+#endif
+
 typedef unsigned char uchar;
 typedef unsigned int uint;
+
+typedef struct _XPMINFO {
+  uint *a; // pixel buffer
+} XPMINFO;
+
+__PORT uint loadxpm(XPMINFO *xi, char *xpmfile);
 
 #define _XPM "xpm"
 

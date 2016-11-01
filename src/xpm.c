@@ -5,12 +5,18 @@
   >test_xpm.py
 */
 
+#define __XPM_MAKE_DLL_
 #include <xpm.h>
 
 #include <numpy/arrayobject.h>
 
 #define DEBUGLOG 0
 #define TESTLOG "../dll/_test_dll_.log"
+
+__PORT uint loadxpm(XPMINFO *xi, char *xpmfile)
+{
+  return 0;
+}
 
 static int tbInfo(int line, PyCodeObject *f_code)
 {
