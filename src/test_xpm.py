@@ -13,7 +13,7 @@ from scipy import misc
 # from PIL import Image
 
 sys.path.append('../dll')
-import xpm
+from pyxpm import xpm
 
 XPM_BASE = '/tmp'
 XPM_INFILE = '%s/testdata.xpm' % XPM_BASE

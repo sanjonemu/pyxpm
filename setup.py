@@ -19,9 +19,16 @@ data_apdx = [
   '.gitignore',
   'README.md',
   'LICENSE',
-  'requirements.txt']
+  'requirements.txt',
+  'setup.py']
 
-R_APDX = [('dll', ['.gitkeep'])]
+R_APDX = [(PKG_TITLE, [
+  '__init__.py',
+  'xpm.py'])] # remove 'xpm.py' and replace to 'xpm.pyd' later
+R_APDX += [('%s/%s' % (PKG_TITLE, 'conf'), [
+  'setup.cf'])]
+R_APDX += [('dll', [
+  '.gitkeep'])]
 R_APDX += [('res', [
   'cs_Tux_58x64_c16.xpm',
   'cs_Tux_ecb_58x64_c16.xpm'])]
@@ -30,7 +37,8 @@ R_APDX += [('include', [
 R_APDX += [('src', [
   'xpm.c',
   'test_xpm.py',
-  'makefile.tdmgcc64'])]
+  'makefile.tdmgcc64',
+  'setup.py'])]
 data_r_apdx = [map(lambda a: '%s/%s' % (t[0], a), t[1]) for t in R_APDX]
 
 if os.name != 'nt':
