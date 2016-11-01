@@ -2,23 +2,19 @@
 # -*- coding: utf-8 -*-
 '''xpm
 dummy checker 7x5_c16
-FF0000 FFFFFF FF0000 FFFFFF FF0000 FFFFFF FF0000
-FFFFFF 00FF00 FFFFFF 00FF00 FFFFFF 00FF00 FFFFFF
-0000FF FFFFFF 0000FF FFFFFF 0000FF FFFFFF 0000FF
-FFFFFF 333333 FFFFFF 666666 FFFFFF CCCCCC FFFFFF
-00FFFF FFFFFF FF00FF FFFFFF FFFF00 FFFFFF 000000
 '''
 
 import sys
 import numpy as np
 
-bm = np.array([
-[[1.,0.,0.],[1.,1.,1.],[1.,0.,0.],[1.,1.,1.],[1.,0.,0.],[1.,1.,1.],[1.,0.,0.]],
-[[1.,1.,1.],[0.,1.,0.],[1.,1.,1.],[0.,1.,0.],[1.,1.,1.],[0.,1.,0.],[1.,1.,1.]],
-[[0.,0.,1.],[1.,1.,1.],[0.,0.,1.],[1.,1.,1.],[0.,0.,1.],[1.,1.,1.],[0.,0.,1.]],
-[[1.,1.,1.],[.2,.2,.2],[1.,1.,1.],[.4,.4,.4],[1.,1.,1.],[.8,.8,.8],[1.,1.,1.]],
-[[0.,1.,1.],[1.,1.,1.],[1.,0.,1.],[1.,1.,1.],[1.,1.,0.],[1.,1.,1.],[0.,0.,0.]]
-], dtype=np.float32)
+F, C, H, G, D, O = 255, 203, 159, 101, 50, 0
+bm = np.array([ # RGB(A)
+ [[F,O,O,F], [F,F,F,F], [F,O,O,F], [F,F,F,F], [F,O,O,H], [F,F,F,F], [F,O,O,F]],
+ [[F,F,F,F], [O,F,O,F], [F,F,F,F], [O,F,O,H], [F,F,F,F], [O,F,O,F], [F,F,F,F]],
+ [[O,O,F,F], [F,F,F,F], [O,O,F,H], [F,F,F,F], [O,O,F,F], [F,F,F,F], [O,O,F,F]],
+ [[F,F,F,F], [D,D,D,F], [F,F,F,F], [G,G,G,F], [F,F,F,F], [C,C,C,F], [F,F,F,F]],
+ [[O,F,F,F], [F,F,F,F], [F,O,F,F], [F,F,F,F], [F,F,O,F], [F,F,F,F], [O,O,O,F]]
+], dtype=np.uint8)
 
 def XPM(*args, **kwargs):
   sys.stderr.write('''** remove 'xpm.py' and replace to 'xpm.pyd' later **''')

@@ -24,16 +24,16 @@ XPM_OUTPNG = '%s/testdata.png' % XPM_BASE
 def main():
   fig = plt.figure()
   axis = [fig.add_subplot(211 + _) for _ in range(2)]
-  bm = xpm.XPM(XPM_INFILE) # as ndarray
+  bm = xpm.XPM(XPM_INFILE) # as ndarray (dtype=np.uint8) RGB(A)
   sys.stderr.write('%s\n' % str(bm))
   axis[0].imshow(bm)
-  # misc.imsave(XPM_OUTGIF_0, np.uint8(bm))
-  misc.imsave(XPM_OUTGIF_0, np.float32(bm))
-  # misc.imsave(XPM_OUTGIF_1, misc.bytescale(bm, cmin=0, cmax=255))
-  misc.imsave(XPM_OUTGIF_1, misc.bytescale(bm))
+  # misc.imsave(XPM_OUTGIF_0, np.uint8(bm)) # changed
+  misc.imsave(XPM_OUTGIF_0, np.float32(bm)) # color changed
+  # misc.imsave(XPM_OUTGIF_1, misc.bytescale(bm, cmin=0, cmax=255)) # changed
+  misc.imsave(XPM_OUTGIF_1, misc.bytescale(bm)) # color changed
   # im = misc.toimage(bm, cmin=0, cmax=255) # same as PIL.Image
   im = misc.toimage(bm) # same as PIL.Image
-  im.save(XPM_OUTPNG)
+  im.save(XPM_OUTPNG) # palette ok
   axis[1].imshow(im)
   plt.show()
 

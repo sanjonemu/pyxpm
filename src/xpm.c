@@ -133,15 +133,15 @@ PyObject *XPM(PyObject *self, PyObject *args, PyObject *kw)
   if(fn){
     // PyDict_SetItemString(pdi, "fn", PyString_FromString(fn));
     // XPMPROCESSEXCEPTION("XPM");
-    int ndim = 3;
-    npy_intp dims[] = {5, 7, 3}; // shapes
-    static double dummy[] = {
-      1.,1.,1., 0.,0.,1., 1.,1.,1., 0.,0.,1., 1.,1.,1., 0.,0.,1., 1.,1.,1.,
-      0.,0.,1., 1.,1.,1., 0.,0.,1., 1.,1.,1., 0.,0.,1., 1.,1.,1., 0.,0.,1.,
-      1.,1.,1., 0.,0.,1., 1.,1.,1., 0.,0.,1., 1.,1.,1., 0.,0.,1., 1.,1.,1.,
-      0.,0.,1., 1.,1.,1., 0.,0.,1., 1.,1.,1., 0.,0.,1., 1.,1.,1., 0.,0.,1.,
-      1.,1.,1., 0.,0.,1., 1.,1.,1., 0.,0.,1., 1.,1.,1., 0.,0.,1., 1.,1.,1.};
-    nda = PyArray_SimpleNewFromData(ndim, dims, NPY_DOUBLE, dummy);
+    npy_intp dims[] = {5, 7, 4}; // shapes {rows, cols, colors: RGBA}
+    int ndim = sizeof(dims) / sizeof(dims[0]);
+    static uint dummy[] = { // (uint *) ABGR -> (uchar *) R,G,B,A (dims[2] = 4)
+ 0xFF00FFFF,0xFF0000FF,0xFF00FFFF,0xFF0000FF,0xFF00FFFF,0xFF0000FF,0xFF00FFFF,
+ 0xFFFF0000,0xFF00FFFF,0xFFFF0000,0xFF00FFFF,0xFFFF0000,0xFF00FFFF,0xFFFF0000,
+ 0xFF00FFFF,0xFF00FF00,0xFF00FFFF,0xFF00FF00,0xFF00FFFF,0xFF00FF00,0xFF00FFFF,
+ 0xFF33AAEE,0xFFFFFF00,0xFF33AAEE,0xFFFF00FF,0xFF33AAEE,0xFF00FFFF,0xFF33AAEE,
+ 0xFFFFFF00,0xFF33AAEE,0xFFFF00FF,0xFF33AAEE,0xFF00FFFF,0xFF33AAEE,0xCC33AAEE};
+    nda = PyArray_SimpleNewFromData(ndim, dims, PyArray_UBYTE, dummy);
   }
   if(!nda){ // if(nda == Py_None)
     return Py_BuildValue("O", Py_None); // must raise Exception
