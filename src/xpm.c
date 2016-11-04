@@ -339,10 +339,15 @@ __PORT uint loadxpm(XPMINFO *xi, char *xpmbuffer)
       rerror(1, "unknown stat: %d", stat);
     }
   }
-  if(xi->a){
-    free(xi->a); xi->a = NULL;
-    rprintf("done. (%d, %d, %d): %d", xi->r, xi->c, xi->ncolors, xi->cpp);
-  }
+  if(!xi->a) return 1;
+  rprintf("done. (%d, %d, %d): %d", xi->r, xi->c, xi->ncolors, xi->cpp);
+  return 0;
+}
+
+__PORT uint freexpm(XPMINFO *xi)
+{
+  if(!xi) return 1;
+  if(xi->a){ free(xi->a); xi->a = NULL; }
   return 0;
 }
 

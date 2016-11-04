@@ -54,6 +54,7 @@ R_APDX += [('include', [
 R_APDX += [('src', [
   'xpm.c',
   'test_xpm.py',
+  'test_c.py',
   'makefile.tdmgcc64',
   'setup.py'])]
 data_r_apdx = [map(lambda a: '%s/%s' % (t[0], a), t[1]) for t in R_APDX]

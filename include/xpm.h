@@ -74,6 +74,7 @@ typedef struct _XPMINFO {
 } XPMINFO;
 
 __PORT uint loadxpm(XPMINFO *xi, char *xpmbuffer);
+__PORT uint freexpm(XPMINFO *xi);
 __PORT uint getxpminfosize();
 
 #define _XPM "xpm"
