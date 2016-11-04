@@ -475,8 +475,18 @@ PyObject *XPM(PyObject *self, PyObject *args, PyObject *kw)
   }
 
   if(buf){
+#if 1
     // PyDict_SetItemString(pdi, "buf", PyString_FromString(buf));
     // XPMPROCESSEXCEPTION("XPM");
+    XPMINFO xi;
+    if(!loadxpm(&xi, buf)){
+      npy_intp dims[] = {xi.r, xi.c, 4}; // shapes {rows, cols, colors: RGBA}
+      int ndim = sizeof(dims) / sizeof(dims[0]);
+      nda = PyArray_SimpleNew(ndim, dims, NPY_UINT8);
+      if(nda) memcpy(PyArray_DATA(nda), xi.a, dims[0] * dims[1] * dims[2]);
+      freexpm(&xi);
+    }
+#else
     npy_intp dims[] = {5, 7, 4}; // shapes {rows, cols, colors: RGBA}
     int ndim = sizeof(dims) / sizeof(dims[0]);
 #if 0
@@ -495,6 +505,7 @@ PyObject *XPM(PyObject *self, PyObject *args, PyObject *kw)
  0xFF00FFFF,0xFFEEAA33,0xFFFF00FF,0xFFEEAA33,0xFFFFFF00,0xFFEEAA33,0xCCEEAA33};
 #endif
     nda = PyArray_SimpleNewFromData(ndim, dims, NPY_UINT8, dummy);
+#endif
   }
   if(!nda){ // if(nda == Py_None)
     Py_RETURN_NONE; // must raise Exception
