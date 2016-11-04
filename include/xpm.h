@@ -13,6 +13,9 @@
 #include <structmember.h>
 #include <frameobject.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdarg.h>
 
 #ifdef __XPM_MAKE_DLL_
 #define __PORT __declspec(dllexport) // make dll mode
@@ -20,14 +23,58 @@
 #define __PORT __declspec(dllimport) // use dll mode
 #endif
 
+typedef enum {
+  black, dblue, dgreen, dcyan, dred, dmagenta, dyellow, gray,
+  dgray, blue, green, cyan, red, magenta, yellow, white,
+} color;
+
 typedef unsigned char uchar;
 typedef unsigned int uint;
 
+#define BUFSIZE 4096
+
+#define CON_BG dblue
+#define CON_FG cyan
+
+#define XPML 2
+#define XPM_FMT_FIRST "/* XPM"
+#define XPM_FMT_SECOND "static char *"
+#define XPM_FMT_XPMEXT "XPMEXT"
+#define XPM_PNONE "          "
+#define XPM_CPP_MAX 10 // length of XPM_PNONE (set <= 10)
+#define XPM_COLOR_NONE ((((CON_BG << 4) | (CON_FG & 0x0F)) << 24) | 0x00EEAA22)
+#define XPM_COLOR_BUF 16 // string length of a descriptor
+#define XPM_PALETTE_MAX 256
+
+#define XPMNCPY(D, S) do{ \
+  if(S){ strncpy(D, S, sizeof(D) - 1); D[sizeof(D) - 1] = '\0'; }\
+  else D[0] = '\0'; \
+}while(0)
+
+typedef struct _XPMCOLORMAP {
+  uint argb;
+  char *c;
+} XPMCOLORMAP;
+
+typedef struct _XPMCOLOR {
+  char s[XPM_COLOR_BUF]; // str
+  char c[XPM_COLOR_BUF]; // color
+  char m[XPM_COLOR_BUF]; // mono
+  char g[XPM_COLOR_BUF]; // gray
+  uint argb; // (DWORD *) (A)RGB L.E. -> (BYTE *) B,G,R,A (PNONE-A is BGFG)
+  char p[XPM_CPP_MAX + 1]; // characters per pixel and space for '\0'
+  char reserved[1]; // alignment
+} XPMCOLOR;
+
 typedef struct _XPMINFO {
+  int c, r, p, d; // cols rows planes depth-bits
+  int bpp, wlen, sz, xpmext, ncolors, cpp, x_hot, y_hot;
+  XPMCOLOR pal[XPM_PALETTE_MAX]; // color table (none = pal[0])
   uint *a; // pixel buffer
 } XPMINFO;
 
-__PORT uint loadxpm(XPMINFO *xi, char *xpmfile);
+__PORT uint loadxpm(XPMINFO *xi, char *xpmbuffer);
+__PORT uint getxpminfosize();
 
 #define _XPM "xpm"
 
@@ -58,5 +105,6 @@ __PORT uint loadxpm(XPMINFO *xi, char *xpmfile);
 
 PyObject *xpmProcessException(PyObject *self, PyObject *args, PyObject *kw);
 PyObject *XPM(PyObject *self, PyObject *args, PyObject *kw);
+PyObject *XPMINFOSIZE(PyObject *self);
 
 #endif // __XPM_H__

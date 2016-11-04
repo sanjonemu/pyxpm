@@ -16,6 +16,6 @@ __author_email__ = 'sanjo_nemu@yahoo.co.jp'
 
 XPM_CUSTOM = __conf__[2:]
 
-from xpm import XPM
+from xpm import XPM, XPMINFOSIZE
 
-__all__ = ['XPM']
+__all__ = ['XPM', 'XPMINFOSIZE']

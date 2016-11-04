@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 # import matplotlib.image as mpimg
 from scipy import misc
-# from PIL import Image
+from PIL import Image
 
 sys.path.append('..')
 from pyxpm import xpm
@@ -24,8 +24,13 @@ XPM_OUTPNG = '%s/testdata.png' % XPM_BASE
 def main():
   fig = plt.figure()
   axis = [fig.add_subplot(211 + _) for _ in range(2)]
-  bm = xpm.XPM(XPM_INFILE) # as ndarray (dtype=np.uint8) RGB(A)
-  sys.stderr.write('%s\n' % str(bm))
+  s = open(XPM_INFILE, 'rb').read()
+  nda = xpm.XPM(s) # as ndarray (dtype=np.uint8) BGR(A)
+  sys.stderr.write('%s\n' % str(nda))
+  r, c, m = nda.shape
+  img = Image.frombuffer('RGBA', (c, r), nda, 'raw', 'BGRA', 0, 1)
+  img.show() # PIL.Image
+  bm = np.array(img) # RGB(A)
   axis[0].imshow(bm)
   # misc.imsave(XPM_OUTGIF_0, np.uint8(bm)) # changed
   misc.imsave(XPM_OUTGIF_0, np.float32(bm)) # color changed
