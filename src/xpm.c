@@ -89,7 +89,6 @@ plt.show()
 #define TESTLOG "../dll/_test_dll_.log"
 
 static XPMCOLORMAP xpmcolors[] = { // (uint *) (A)RGB L.E. -> (BYTE *) B,G,R,A
-  {XPM_COLOR_NONE, "none"},
   {0x08000000, "black"},
   {0x1E00007F, "dblue"},
   {0x2D007F00, "dgreen"},
@@ -106,7 +105,6 @@ static XPMCOLORMAP xpmcolors[] = { // (uint *) (A)RGB L.E. -> (BYTE *) B,G,R,A
   {0xD2FF00FF, "magenta"},
   {0xE1FFFF00, "yellow"},
   {0xF7FFFFFF, "white"},
-  {XPM_COLOR_NONE, "None"}, // dummy
   {0x293F7F00, "darkolivegreen"}, // test
   {0xB100FFFF, "lightblue"}, // cyan
   {0x807F7F7F, "gray50"}, // test
@@ -136,12 +134,13 @@ static int rerror(int e, char *fmt, ...)
   return e;
 }
 
-static uint getXPMcolor(char *c)
+static uint getXPMcolor(XPMINFO *xi, char *c)
 {
-  int i;
-  if(!c) return XPM_COLOR_NONE;
+  int i, len = XPM_COLOR_BUF - 1;
+  if(!c || !strncmp("none", c, len) || !strncmp("None", c, len))
+    return xi->color_none;
   for(i = 0; i < sizeof(xpmcolors) / sizeof(xpmcolors[0]); ++i){
-    if(!strncmp(xpmcolors[i].c, c, XPM_COLOR_BUF-1)) return xpmcolors[i].argb;
+    if(!strncmp(xpmcolors[i].c, c, len)) return xpmcolors[i].argb;
   }
   if(c[0] == '#'){
     uint argb;
@@ -164,7 +163,7 @@ static uint getXPMcolor(char *c)
     }
   }
   rerror(1, "unknown color: [%s]", c);
-  return XPM_COLOR_NONE;
+  return xi->color_none;
 }
 
 static int setXPMpal(XPMINFO *xi, int n, char *s, char *c, char *m, char *g,
@@ -183,7 +182,7 @@ static uint pickXPMpal(XPMINFO *xi, char *p)
     if(!strncmp(xi->pal[i].p, p, xi->cpp)) return xi->pal[i].argb;
   }
   rerror(1, "unknown color palette: [%s]", p);
-  return XPM_COLOR_NONE;
+  return xi->color_none;
 }
 
 static int buildBMP(XPMINFO *xi)
@@ -245,7 +244,12 @@ static int loadXPMpal(XPMINFO *xi, int n, char *buf)
     if(r = strchr(q, '\t')) *r = '\0';
     else break;
   }
-  return setXPMpal(xi, n, s, c, m, g, getXPMcolor(c), p);
+  uint argb = getXPMcolor(xi, c);
+  if(xi->mode & 0x00000001){
+    if(argb == xi->color_none) argb &= 0x00FFFFFF;
+    else argb |= 0xFF000000;
+  }
+  return setXPMpal(xi, n, s, c, m, g, argb, p);
 }
 
 static int loadXPMpixel(XPMINFO *xi, int n, char *buf)
@@ -312,7 +316,8 @@ __PORT uint loadxpm(XPMINFO *xi, char *xpmbuffer)
   memset(xi, 0, sizeof(XPMINFO));
   // test (c=8, r=4, p=4, d=8) 128B=32W(=r4xc8)=32B/line=4B/pixel(=d8p4)
   xi->c = 64, xi->r = 38, xi->p = 4, xi->d = 8;
-  setXPMpal(xi, 0, "none", "none", "none", "none", XPM_COLOR_NONE, XPM_PNONE);
+  xi->color_none = XPM_COLOR_NONE, xi->mode = 1;
+  setXPMpal(xi, 0, "none", "none", "none", "none", xi->color_none, XPM_PNONE);
   rprintf("loading: len=%d", strlen(xpmbuffer));
   while(sgets(buf, sizeof(buf) / sizeof(buf[0]), &sp)){
     if(!rstrip(buf)) continue;
@@ -457,10 +462,12 @@ PyObject *XPM(PyObject *self, PyObject *args, PyObject *kw)
   char *buf;
   PyObject *nda = NULL; // PyArrayObject *nda = NULL;
 
+#if 0
   FILE *fp = fopen(TESTLOG, "ab");
   fprintf(fp, "XPM %08x %08x %08x\n",
     (uchar *)self, (uchar *)args, (uchar *)kw);
   fclose(fp);
+#endif
 
   char *keys[] = {"buf", NULL};
   if(!PyArg_ParseTupleAndKeywords(args, kw, "|s", keys, &buf)){
@@ -469,9 +476,11 @@ PyObject *XPM(PyObject *self, PyObject *args, PyObject *kw)
     fclose(fp);
     Py_RETURN_NONE; // must raise Exception
   }else{
+#if 0
     FILE *fp = fopen(TESTLOG, "ab");
     fprintf(fp, "SUCCESS: PyArg_ParseTupleAndKeywords(len=%d)\n", strlen(buf));
     fclose(fp);
+#endif
   }
 
   if(buf){

@@ -42,7 +42,7 @@ typedef unsigned int uint;
 #define XPM_FMT_XPMEXT "XPMEXT"
 #define XPM_PNONE "          "
 #define XPM_CPP_MAX 10 // length of XPM_PNONE (set <= 10)
-#define XPM_COLOR_NONE ((((CON_BG << 4) | (CON_FG & 0x0F)) << 24) | 0x00EEAA22)
+#define XPM_COLOR_NONE ((((CON_BG << 4) | (CON_FG & 0x0F)) << 24) | 0x00EEAA33)
 #define XPM_COLOR_BUF 16 // string length of a descriptor
 #define XPM_PALETTE_MAX 256
 
@@ -71,6 +71,9 @@ typedef struct _XPMINFO {
   int bpp, wlen, sz, xpmext, ncolors, cpp, x_hot, y_hot;
   XPMCOLOR pal[XPM_PALETTE_MAX]; // color table (none = pal[0])
   uint *a; // pixel buffer
+  uint *reserved;
+  uint color_none;
+  uint mode; // alpha value mode = 0: console, 1: ndarray
 } XPMINFO;
 
 __PORT uint loadxpm(XPMINFO *xi, char *xpmbuffer);
